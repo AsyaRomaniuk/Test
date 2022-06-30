@@ -1,0 +1,129 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Glowing Pointer</title>
+	<style>
+		::selection{
+			background-color: black;
+		}
+		@keyframes click-anim {
+			0%   {transform:scale(1);}
+			50%  {transform:scaleX(1) scaleY(0.25); box-shadow: 0 0 12px grey, inset 0 0 16px black;}
+			100% {transform:scale(1);}
+		}
+		@keyframes button-hover-anim{
+			0% {background-color: #424242; color: whitesmoke;}
+			100% {background-color: silver; color: black;
+				box-shadow: 4px 6px 6px white;
+			}
+		}
+		@keyframes button-active-anim{
+			0% {padding: 10px 20px 10px 20px}
+			100% {padding: 14px 24px 24px 14px;}
+		}
+		.click{
+			animation: click-anim;
+			animation-duration: 0.3s;
+		}
+		.pointer-shadow{
+			background-color: transparent;
+			top: -100px;
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			box-shadow: 0 0 12px grey, inset 0 0 16px white;
+			position: absolute;
+		}
+		.glowing-button{
+			position: absolute;
+			top: 20%;
+			left: 10%;
+			border: 4px solid grey;
+			padding: 10px 20px 10px 20px;
+			font-family: Georgia;
+			color: whitesmoke;
+			font-size: 20px;
+			border-radius: 40%;
+		}
+		.glowing-button:hover{
+			background-color: silver;
+			color: black;
+			animation: button-hover-anim;
+			animation-duration: 0.5s;
+			box-shadow: 4px 6px 6px white;
+		}
+		.glowing-button:active{
+			animation: button-active-anim;
+			animation-duration: 0.1s;
+			padding: 14px 24px 24px 14px;
+		}
+		body{
+			background-color: #424242;
+			position: absolute;
+			width:100%;
+			height:100%;
+			cursor: none;
+			box-shadow: 0 0 12px grey, inset 0 0 16px white;
+		}
+	</style>
+</head>
+<body>
+	<div id="pointer" class="pointer-shadow"></div>
+	<div class="glowing-button">Кнопка</div>
+	<script>
+		class PointerShadow{
+			constructor(x, y, r){
+				this.r = r;
+				this.x = x;
+				this.y = y;
+				this.id = document.createElement("div");
+				this.id.className = "pointer-shadow";
+				this.id.style.left = x+"px";
+				this.id.style.top = y+"px";
+				document.body.appendChild(this.id);
+			}
+			remove_child_from_body(){
+				this.id.remove();
+			}
+		}
+		function loop(){
+			for (i = 0; i < G_pointer_shadows.length; i++){
+				G_pointer_shadows[i].r -= 8;
+				if (G_pointer_shadows[i].r > 0){
+					G_pointer_shadows[i].id.style.width = G_pointer_shadows[i].r+"px";
+					G_pointer_shadows[i].id.style.height = G_pointer_shadows[i].r+"px";
+					G_pointer_shadows[i].id.style.left = G_pointer_shadows[i].x+25-G_pointer_shadows[i].r/2+"px";
+					G_pointer_shadows[i].id.style.top = G_pointer_shadows[i].y+25-G_pointer_shadows[i].r/2+"px";
+				}
+				else {
+					G_pointer_shadows[i].remove_child_from_body();
+					G_pointer_shadows.splice(i, 1);
+				}
+			}
+			setTimeout(loop, G_TIME);
+		}
+		const G_TIME = 50;
+		var G_pointer_shadows = [];
+		let pointer = document.getElementById("pointer");
+		document.addEventListener("mousemove", function(e){
+			pointer.style.left = e.clientX-25+"px";
+			pointer.style.top = e.clientY-25+"px";
+			G_pointer_shadows.push(new PointerShadow(e.clientX-25, e.clientY-25, 50));
+		});
+		document.addEventListener("touchmove", function(e){
+			pointer.style.left = e.touches[0].clientX-25+"px";
+			pointer.style.top = e.touches[0].clientY-25+"px";
+			G_pointer_shadows.push(new PointerShadow(e.touches[0].clientX-25, e.touches[0].clientY-25, 50));
+		});
+		["click", "touch"].forEach(function(ev){
+			document.addEventListener(ev, function(){
+				pointer.classList.remove('click');
+				void pointer.offsetWidth;
+				pointer.classList.add('click');
+			});
+		});
+		setTimeout(loop, G_TIME);
+	</script>
+</body>
+</html>
